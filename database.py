@@ -41,3 +41,28 @@ print("\n✨ Así quedan los datos listos para el árbol (solo números):")
 print(df.head())
 
 
+# 5. Separamos los datos
+# X son nuestras características (todo menos la enfermedad y el Outcome_Variable)
+X = df[['Fever', 'Cough', 'Fatigue', 'Difficulty_Breathing', 'Age', 'Gender', 
+        'Blood_Pressure', 'Cholesterol_Level']]
+
+# y es lo que queremos predecir (la enfermedad en texto)
+y = df['Disease']
+
+# 6. (Opcional pero recomendado) Separamos un pequeño porcentaje de datos para probar si el árbol es bueno
+X_entrenamiento, X_prueba, y_entrenamiento, y_prueba = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 7. Creamos el "cerebro" (el árbol de decisión)
+arbol = DecisionTreeClassifier(random_state=42)
+
+# 8. Entrenamos el árbol dándole los síntomas y diciéndole qué enfermedad era
+arbol.fit(X_entrenamiento, y_entrenamiento)
+
+print("🌳 ¡Árbol de decisión entrenado con éxito!")
+
+# Vamos a hacer una prueba rápida para ver si funciona:
+# Simulamos un paciente: Fiebre(1), Tos(1), Fatiga(0), Dif.Respirar(1), Edad(25), Género(1-Hombre), Presión(1-Normal), Colest.(1-Normal)
+paciente_prueba = [[1, 1, 0, 1, 25, 1, 1, 1]] 
+prediccion = arbol.predict(paciente_prueba)
+
+print(f"🩺 Predicción para el paciente de prueba: {prediccion[0]}")
