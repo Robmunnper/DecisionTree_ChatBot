@@ -66,3 +66,48 @@ paciente_prueba = [[1, 1, 0, 1, 25, 1, 1, 1]]
 prediccion = arbol.predict(paciente_prueba)
 
 print(f"🩺 Predicción para el paciente de prueba: {prediccion[0]}")
+
+def iniciar_chatbot():
+    print("\n" + "="*50)
+    print("🤖 ¡Hola! Soy tu asistente médico virtual.")
+    print("Voy a hacerte algunas preguntas para darte un diagnóstico preliminar.")
+    print("="*50 + "\n")
+
+    # Diccionarios para traducir las respuestas de texto a números
+    map_sintomas = {'si': 1, 'no': 0}
+    map_genero = {'hombre': 1, 'mujer': 0}
+    map_niveles = {'bajo': 0, 'normal': 1, 'alto': 2}
+
+    try:
+        # Preguntamos al usuario y usamos .strip().lower() para limpiar espacios y mayúsculas
+        fiebre = map_sintomas[input("¿Tienes fiebre? (si/no): ").strip().lower()]
+        tos = map_sintomas[input("¿Tienes tos? (si/no): ").strip().lower()]
+        fatiga = map_sintomas[input("¿Sientes fatiga? (si/no): ").strip().lower()]
+        dif_resp = map_sintomas[input("¿Tienes dificultad para respirar? (si/no): ").strip().lower()]
+        
+        edad = int(input("¿Cuál es tu edad?: ").strip())
+        genero = map_genero[input("¿Cuál es tu género? (hombre/mujer): ").strip().lower()]
+        
+        presion = map_niveles[input("¿Cómo es tu presión arterial? (bajo/normal/alto): ").strip().lower()]
+        colesterol = map_niveles[input("¿Cómo es tu nivel de colesterol? (bajo/normal/alto): ").strip().lower()]
+
+        # Agrupamos las respuestas en el formato que espera el árbol (una lista dentro de otra lista)
+        # El orden debe ser EXACTAMENTE el mismo que usamos al crear la variable X
+        sintomas_usuario = [[fiebre, tos, fatiga, dif_resp, edad, genero, presion, colesterol]]
+
+        # Le pedimos al árbol que haga la predicción
+        print("\n⏳ Analizando tus síntomas...")
+        prediccion = arbol.predict(sintomas_usuario)
+        
+        print("\n" + "="*50)
+        print(f"🩺 DIAGNÓSTICO PRELIMINAR: Según mis datos, podrías tener {prediccion[0]}.")
+        print("⚠️ AVISO: Esto es un proyecto académico. ¡Consulta siempre a un médico real!")
+        print("="*50 + "\n")
+
+    except KeyError:
+        print("\n❌ Error: No he entendido alguna respuesta. Por favor, responde exactamente con las opciones dadas (si/no, etc.).")
+    except ValueError:
+        print("\n❌ Error: La edad debe ser un número entero.")
+
+# ¡Llamamos a la función para que empiece el chat!
+iniciar_chatbot()
