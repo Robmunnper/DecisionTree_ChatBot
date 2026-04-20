@@ -58,7 +58,7 @@ arbol = DecisionTreeClassifier(random_state=42)
 # 8. Entrenamos el árbol dándole los síntomas y diciéndole qué enfermedad era
 arbol.fit(X_entrenamiento, y_entrenamiento)
 
-print("🌳 ¡Árbol de decisión entrenado con éxito!")
+print("¡Árbol de decisión entrenado con éxito!")
 
 # Vamos a hacer una prueba rápida para ver si funciona:
 # Simulamos un paciente: Fiebre(1), Tos(1), Fatiga(0), Dif.Respirar(1), Edad(25), Género(1-Hombre), Presión(1-Normal), Colest.(1-Normal)
@@ -96,18 +96,18 @@ def iniciar_chatbot():
         sintomas_usuario = [[fiebre, tos, fatiga, dif_resp, edad, genero, presion, colesterol]]
 
         # Le pedimos al árbol que haga la predicción
-        print("\n⏳ Analizando tus síntomas...")
+        print("\n Analizando tus síntomas...")
         prediccion = arbol.predict(sintomas_usuario)
         
         print("\n" + "="*50)
         print(f"🩺 DIAGNÓSTICO PRELIMINAR: Según mis datos, podrías tener {prediccion[0]}.")
-        print("⚠️ AVISO: Esto es un proyecto académico. ¡Consulta siempre a un médico real!")
+        print(" AVISO: Esto es un proyecto académico. ¡Consulta siempre a un médico real!")
         print("="*50 + "\n")
 
     except KeyError:
-        print("\n❌ Error: No he entendido alguna respuesta. Por favor, responde exactamente con las opciones dadas (si/no, etc.).")
+        print("\n Error: No he entendido alguna respuesta. Por favor, responde exactamente con las opciones dadas (si/no, etc.).")
     except ValueError:
-        print("\n❌ Error: La edad debe ser un número entero.")
+        print("\n Error: La edad debe ser un número entero.")
 
 # ¡Llamamos a la función para que empiece el chat!
 iniciar_chatbot()
