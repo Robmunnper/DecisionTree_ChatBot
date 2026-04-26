@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score, classification_report
 import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Chatbot Médico", layout="wide")
-st.title("🩺 Asistente Médico con Árboles de Decisión")
+st.title("Asistente Médico con Árboles de Decisión")
 
 @st.cache_data
 def cargar_datos():
