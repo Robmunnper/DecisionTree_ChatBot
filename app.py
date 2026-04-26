@@ -6,21 +6,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import matplotlib.pyplot as plt
 
-# 1. Configuración de la página web
 st.set_page_config(page_title="Chatbot Médico", layout="wide")
 st.title("🩺 Asistente Médico con Árboles de Decisión")
 
-# 2. Conectar a BD y cargar datos
 @st.cache_data
 def cargar_datos():
     conexion = mysql.connector.connect(
         host="localhost", user="root", password="", database="chatbot_cbd"
     )
-    # ¡IMPORTANTE! Cambia 'nombre_de_tu_tabla' por el nombre real de tu tabla en HeidiSQL
     df = pd.read_sql("SELECT * FROM historial_pacientes;", conexion)
     conexion.close()
     
-    # Transformar texto a números para el algoritmo
+    
     for col in ['Fever', 'Cough', 'Fatigue', 'Difficulty_Breathing']:
         df[col] = df[col].map({'Yes': 1, 'No': 0})
     df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
@@ -28,37 +25,30 @@ def cargar_datos():
     df['Cholesterol_Level'] = df['Cholesterol_Level'].map({'Low': 0, 'Normal': 1, 'High': 2})
     return df
 
-# 3. Entrenar el modelo y calcular precisión
+
 @st.cache_resource
 def entrenar_modelo(df):
     X = df[['Fever', 'Cough', 'Fatigue', 'Difficulty_Breathing', 'Age', 'Gender', 'Blood_Pressure', 'Cholesterol_Level']]
     y = df['Disease']
     
-    # Dividimos los datos: 80% para entrenar, 15% para evaluar (examen)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
     
-    # Entrenamos el árbol
     arbol = DecisionTreeClassifier(random_state=42, max_depth=5) 
     arbol.fit(X_train, y_train)
     
-    # Evaluamos la precisión con los datos de prueba
     predicciones_examen = arbol.predict(X_test)
     precision = accuracy_score(y_test, predicciones_examen)
     reporte = classification_report(y_test, predicciones_examen, output_dict=True, zero_division=0)
     
     return arbol, X.columns, precision, reporte
 
-# --- EJECUCIÓN PRINCIPAL ---
 try:
-    # Cargamos todo
     df = cargar_datos()
     arbol, columnas, precision_modelo, reporte_modelo = entrenar_modelo(df)
     
-    # 4. Interfaz de Usuario (Preguntas Paso a Paso)
-    st.sidebar.header("📝 Responde paso a paso")
+    st.sidebar.header(" Responde paso a paso")
     st.sidebar.write("Responde una pregunta para desbloquear la siguiente.")
 
-    # Variables neutras por defecto para dibujar el camino inicial
     fiebre_val, tos_val, fatiga_val, dif_resp_val = 0, 0, 0, 0
     edad_val, genero_val, presion_val, colest_val = 25, 0, 1, 1
     pasos_completados = 0
@@ -110,32 +100,25 @@ try:
             colest_val = {"Bajo": 0, "Normal": 1, "Alto": 2}[colesterol]
             pasos_completados += 1
 
-    # Agrupamos las respuestas del usuario
     sintomas_usuario = [[fiebre_val, tos_val, fatiga_val, dif_resp_val, edad_val, genero_val, presion_val, colest_val]]
 
-    # 5. Predicción y Mensajes
     prediccion = arbol.predict(sintomas_usuario)[0]
     
     if pasos_completados == 8:
-        st.success(f"### 💡 Diagnóstico Final: **{prediccion}**")
-        st.warning("⚠️ Aviso: Esto es un proyecto académico. ¡Consulta siempre a un médico!")
+        st.success(f"###  Diagnóstico Final: **{prediccion}**")
     else:
-        st.info(f"👈 Has respondido {pasos_completados} de 8 preguntas. Continúa en el menú para ver tu diagnóstico final. Abajo puedes ver cómo el algoritmo empieza a deducir el resultado.")
+        st.info(f" Has respondido {pasos_completados} de 8 preguntas. Continúa en el menú para ver tu diagnóstico final. Abajo puedes ver cómo el algoritmo empieza a deducir el resultado.")
     
-    # 6. Dibujar el Árbol Mejorado y en Tiempo Real
     st.write("---")
-    st.subheader("🌳 Visualización del Árbol de Decisión en Tiempo Real")
+    st.subheader(" Visualización del Árbol de Decisión en Tiempo Real")
     
     camino_nodos = arbol.decision_path(sintomas_usuario).indices
     
-    # Lienzo grande y alta resolución
     fig, ax = plt.subplots(figsize=(30, 15), dpi=150)
     
-    # Generamos el gráfico base
     nodos_dibujados = plot_tree(arbol, feature_names=columnas, class_names=arbol.classes_, 
                                 filled=True, rounded=True, ax=ax, fontsize=8)
     
-    # Magia Visual: Iluminar el camino correcto
     for i, cajita in enumerate(nodos_dibujados):
         fondo_caja = cajita.get_bbox_patch()
         if fondo_caja is not None:
@@ -150,11 +133,10 @@ try:
     
     st.pyplot(fig, use_container_width=True)
 
-    # 7. Métricas de Evaluación del Modelo
     st.write("---")
-    st.subheader("📊 Evaluación del Modelo (Minería de Datos)")
+    st.subheader(" Evaluación del Modelo")
     
-    st.metric(label="Precisión General (Accuracy)", value=f"{precision_modelo * 100:.1f}%")
+    st.metric(label="Precisión General ", value=f"{precision_modelo * 100:.1f}%")
     
     with st.expander("Ver Reporte de Clasificación Detallado"):
         st.write("Este reporte muestra el rendimiento del modelo evaluando el 15% de datos de prueba separados del entrenamiento inicial:")
@@ -162,4 +144,4 @@ try:
         st.dataframe(df_reporte.style.format("{:.2f}"))
 
 except Exception as e:
-    st.error(f"❌ Error: Asegúrate de que el servidor MariaDB está encendido y el nombre de la tabla es correcto. Detalle: {e}")
+    st.error(f"Error: Asegúrate de que el servidor MariaDB está encendido y el nombre de la tabla es correcto. Detalle: {e}")
